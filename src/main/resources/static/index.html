@@ -1,13 +1,52 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </head>
 <body>
-    <input type="text" name="phone" />
-    <button><a th:href="./">获取验证码</a></button>
-    <input type="text" name="code" />
-    <button><a th:href="./">验证</a></button>
+    <div id="mask">
+        <input type="text" name="phone" v-model="phone" />
+        <button type="button" @click="getCode">获取验证码</button>
+        <span style="color: red" v-text="noteMsg"></span>
+        <br>
+        <span style="color: red" v-text="timeout"></span>
+        <br>
+        <input type="text" name="code" v-model="code"/>
+        <button type="button" @click="verify">验证</button>
+        <span style="color: red" v-text="verifyMsg"></span>
+    </div>
 </body>
+<script>
+    var app = new Vue({
+        el:"#mask",
+        data:{
+          phone:undefined,
+          noteMsg:undefined,
+          timeout:undefined,
+          code:undefined,
+          verifyMsg:undefined
+        },
+        methods:{
+            getCode:function (){
+                var currthis = this;
+                axios.get("/verifyCode?phone="+currthis.phone).then(function (msg){
+                    currthis.noteMsg = msg.data.msg;
+                    currthis.timeout = msg.data.time;
+                    if(msg.data.cod != undefined) {
+                        alert("验证码" + msg.data.cod);
+                    }
+                })
+            },
+            verify:function (){
+                var currthis = this;
+                axios.get("/verify?code="+currthis.code).then(function (msg){
+                    currthis.verifyMsg = msg.data;
+                })
+            }
+        }
+    })
+</script>
 </html>
